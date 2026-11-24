@@ -257,13 +257,26 @@ public partial class MainViewModel : ObservableObject
         catch (IbgeApiException ex)
         {
             if (!cts.IsCancellationRequested)
+            {
+                // Não deixa na tela os nomes da localidade anterior como se fossem desta.
+                LimparResultado();
                 MensagemErro = ex.Message;
+            }
         }
         finally
         {
             if (ReferenceEquals(_ctsNomes, cts))
                 CarregandoNomes = false;
         }
+    }
+
+    private void LimparResultado()
+    {
+        _resultado = null;
+        TemResultado = false;
+        TituloLocalidade = string.Empty;
+        MaisComumMulher = MaisComumHomem = MaisComumSobrenome = "—";
+        Ranking.Clear();
     }
 
     private void AplicarResultado(string titulo, NomesLocalidade? resultado)

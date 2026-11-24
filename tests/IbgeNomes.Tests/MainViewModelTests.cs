@@ -27,10 +27,13 @@ public class MainViewModelTests
     private class NomesFalsos : INomesService
     {
         public List<long> Consultados { get; } = new();
+        public bool Falhar { get; set; }
 
         public Task<NomesLocalidade?> ObterNomesAsync(long localidadeId, CancellationToken cancellationToken = default)
         {
             Consultados.Add(localidadeId);
+            if (Falhar)
+                return Task.FromException<NomesLocalidade?>(new IbgeApiException("Sem conexão com o IBGE."));
             if (localidadeId == 12)
                 return Task.FromResult<NomesLocalidade?>(null);
 
@@ -125,6 +128,23 @@ public class MainViewModelTests
 
         Assert.True(vm.TemErro);
         Assert.Equal("Sem conexão com o IBGE.", vm.MensagemErro);
+    }
+
+    [Fact]
+    public async Task Falha_ao_trocar_de_estado_nao_mantem_os_nomes_do_estado_anterior()
+    {
+        var nomes = new NomesFalsos();
+        var vm = new MainViewModel(new LocalidadesFalsas(), nomes);
+        await vm.CarregarEstadosAsync();
+        vm.EstadoSelecionado = Rj;
+
+        nomes.Falhar = true;
+        vm.EstadoSelecionado = Ac;
+
+        Assert.True(vm.TemErro);
+        Assert.False(vm.TemResultado);
+        Assert.Empty(vm.Ranking);
+        Assert.Equal("—", vm.MaisComumMulher);
     }
 
     [Theory]

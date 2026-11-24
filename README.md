@@ -69,7 +69,7 @@ src/IbgeNomes/
 │   ├── MainPage.xaml        (Pickers, abas, CollectionView)
 │   └── Converters.cs
 └── MauiProgram.cs           ← injeção de dependência: liga as camadas
-tests/IbgeNomes.Tests/       ← 18 testes automatizados (xUnit)
+tests/IbgeNomes.Tests/       ← 19 testes automatizados (xUnit)
 ```
 
 Regras que mantêm as camadas separadas:
@@ -93,7 +93,7 @@ Detalhes de implementação:
 
 ### Opção 1 — APK pronto (mais rápido)
 
-1. Baixe `NomesDoBrasil-v1.0.apk` em **[Releases](../../releases/latest)**.
+1. Baixe `NomesDoBrasil-v1.1.apk` em **[Releases](../../releases/latest)**.
 2. Arraste o arquivo para o emulador Android (ou copie para o celular e instale, permitindo "fontes desconhecidas").
 3. Abra **Nomes do Brasil**. O emulador/celular precisa de **internet**.
 
@@ -133,12 +133,12 @@ O projeto também compila como app de desktop Windows (alvo secundário; a entre
 
 ## 🧪 Testes
 
-`dotnet test tests/IbgeNomes.Tests` — 18 testes:
+`dotnet test tests/IbgeNomes.Tests` — 19 testes:
 
 - **Serviços** (com um `HttpMessageHandler` falso, sem rede): URLs chamadas, desserialização, ordenação, cache,
   resposta `null`, erro HTTP 500, falha de rede e JSON inválido.
 - **ViewModel:** abrir carrega os estados; escolher estado consulta a API de Nomes com o id da UF e carrega os municípios;
-  escolher município consulta com o id de 7 dígitos; troca de abas; aviso de localidade sem dados; mensagem de erro.
+  escolher município consulta com o id de 7 dígitos; troca de abas; aviso de localidade sem dados; mensagem de erro; falha numa troca de estado não deixa na tela os nomes do estado anterior.
 
 ## 🛠️ Tecnologias
 
