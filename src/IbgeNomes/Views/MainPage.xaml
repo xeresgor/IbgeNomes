@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:IbgeNomes.ViewModels"
+             xmlns:models="clr-namespace:IbgeNomes.Models"
+             x:Class="IbgeNomes.Views.MainPage"
+             x:DataType="vm:MainViewModel"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="{StaticResource Fundo}">
+
+    <ContentPage.Resources>
+        <Style x:Key="Cartao" TargetType="Border">
+            <Setter Property="BackgroundColor" Value="White" />
+            <Setter Property="StrokeThickness" Value="0" />
+            <Setter Property="StrokeShape" Value="RoundRectangle 14" />
+            <Setter Property="Padding" Value="14" />
+            <Setter Property="Shadow">
+                <Shadow Brush="#22000000" Offset="0,2" Radius="6" Opacity="0.4" />
+            </Setter>
+        </Style>
+        <Style x:Key="Rotulo" TargetType="Label">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="TextColor" Value="{StaticResource TextoSuave}" />
+        </Style>
+        <Style x:Key="Aba" TargetType="Button">
+            <Setter Property="BackgroundColor" Value="Transparent" />
+            <Setter Property="TextColor" Value="{StaticResource TextoSuave}" />
+            <Setter Property="FontAttributes" Value="Bold" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="Padding" Value="4,8" />
+            <Setter Property="MinimumHeightRequest" Value="40" />
+        </Style>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,*" RowSpacing="12" Padding="16,0,16,12">
+
+        <!-- Cabeçalho -->
+        <VerticalStackLayout Grid.Row="0" Padding="0,20,0,0" Spacing="2">
+            <Label Text="Nomes do Brasil"
+                   FontSize="26" FontAttributes="Bold"
+                   TextColor="{StaticResource Marca}"
+                   SemanticProperties.HeadingLevel="Level1" />
+            <Label Text="Nomes e sobrenomes mais comuns por estado e município · Censo 2022 (IBGE)"
+                   Style="{StaticResource Rotulo}" />
+        </VerticalStackLayout>
+
+        <!-- Seleção de localidade -->
+        <Border Grid.Row="1" Style="{StaticResource Cartao}">
+            <VerticalStackLayout Spacing="6">
+                <Label Text="Estado" Style="{StaticResource Rotulo}" />
+                <Picker Title="Selecione um estado"
+                        ItemsSource="{Binding Estados}"
+                        ItemDisplayBinding="{Binding NomeExibicao, x:DataType=models:Estado}"
+                        SelectedItem="{Binding EstadoSelecionado}"
+                        IsEnabled="{Binding CarregandoEstados, Converter={StaticResource Inverter}}"
+                        AutomationId="PickerEstado" />
+
+                <Grid ColumnDefinitions="*,Auto" Margin="0,6,0,0">
+                    <Label Text="Município (opcional)" Style="{StaticResource Rotulo}" VerticalOptions="Center" />
+                    <ActivityIndicator Grid.Column="1" IsRunning="{Binding CarregandoMunicipios}"
+                                       IsVisible="{Binding CarregandoMunicipios}"
+                                       HeightRequest="16" WidthRequest="16"
+                                       Color="{StaticResource Marca}" />
+                </Grid>
+                <Picker Title="Todo o estado"
+                        ItemsSource="{Binding Municipios}"
+                        ItemDisplayBinding="{Binding Nome, x:DataType=models:Municipio}"
+                        SelectedItem="{Binding MunicipioSelecionado}"
+                        IsEnabled="{Binding MunicipiosHabilitado}"
+                        AutomationId="PickerMunicipio" />
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- Carregando / erro / aviso -->
+        <VerticalStackLayout Grid.Row="2" Spacing="8">
+            <HorizontalStackLayout Spacing="8" IsVisible="{Binding Ocupado}" HorizontalOptions="Center">
+                <ActivityIndicator IsRunning="{Binding Ocupado}" Color="{StaticResource Marca}"
+                                   HeightRequest="22" WidthRequest="22" />
+                <Label Text="Consultando o IBGE…" VerticalOptions="Center" TextColor="{StaticResource TextoSuave}" />
+            </HorizontalStackLayout>
+
+            <Border IsVisible="{Binding TemErro}" BackgroundColor="#FDECEA" StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12" Padding="12">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                    <Label Text="{Binding MensagemErro}" TextColor="#B71C1C" VerticalOptions="Center" />
+                    <Button Grid.Column="1" Text="Tentar novamente"
+                            Command="{Binding TentarNovamenteCommand}"
+                            BackgroundColor="#B71C1C" TextColor="White" FontSize="13"
+                            Padding="10,4" CornerRadius="8" />
+                </Grid>
+            </Border>
+
+            <Label IsVisible="{Binding TemAviso}" Text="{Binding Aviso}"
+                   HorizontalTextAlignment="Center" TextColor="{StaticResource TextoSuave}" />
+
+            <Label IsVisible="{Binding EstadoSelecionado, Converter={StaticResource EhNulo}}"
+                   Text="Escolha um estado para ver os nomes mais comuns."
+                   HorizontalTextAlignment="Center" TextColor="{StaticResource TextoSuave}" Margin="0,12,0,0" />
+        </VerticalStackLayout>
+
+        <!-- Resumo: o 1º de cada lista -->
+        <VerticalStackLayout Grid.Row="3" Spacing="8" IsVisible="{Binding TemResultado}">
+            <Label Text="{Binding TituloLocalidade}" FontSize="18" FontAttributes="Bold"
+                   TextColor="{StaticResource Texto}" />
+            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                <Border Grid.Column="0" Style="{StaticResource Cartao}" Padding="10">
+                    <VerticalStackLayout>
+                        <Label Text="Mulheres" Style="{StaticResource Rotulo}" />
+                        <Label Text="{Binding MaisComumMulher}" FontSize="17" FontAttributes="Bold"
+                               TextColor="{StaticResource CorMulheres}" LineBreakMode="TailTruncation" />
+                    </VerticalStackLayout>
+                </Border>
+                <Border Grid.Column="1" Style="{StaticResource Cartao}" Padding="10">
+                    <VerticalStackLayout>
+                        <Label Text="Homens" Style="{StaticResource Rotulo}" />
+                        <Label Text="{Binding MaisComumHomem}" FontSize="17" FontAttributes="Bold"
+                               TextColor="{StaticResource CorHomens}" LineBreakMode="TailTruncation" />
+                    </VerticalStackLayout>
+                </Border>
+                <Border Grid.Column="2" Style="{StaticResource Cartao}" Padding="10">
+                    <VerticalStackLayout>
+                        <Label Text="Sobrenome" Style="{StaticResource Rotulo}" />
+                        <Label Text="{Binding MaisComumSobrenome}" FontSize="17" FontAttributes="Bold"
+                               TextColor="{StaticResource CorSobrenomes}" LineBreakMode="TailTruncation" />
+                    </VerticalStackLayout>
+                </Border>
+            </Grid>
+        </VerticalStackLayout>
+
+        <!-- Abas: Mulheres | Homens | Sobrenomes -->
+        <Border Grid.Row="4" IsVisible="{Binding TemResultado}" BackgroundColor="#E9ECF2"
+                StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="4">
+            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="4">
+                <Button Grid.Column="0" Text="Mulheres" Style="{StaticResource Aba}"
+                        Command="{Binding SelecionarCategoriaCommand}" CommandParameter="Mulheres">
+                    <Button.Triggers>
+                        <DataTrigger TargetType="Button" Binding="{Binding MulheresSelecionado}" Value="True">
+                            <Setter Property="BackgroundColor" Value="{StaticResource CorMulheres}" />
+                            <Setter Property="TextColor" Value="White" />
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
+                <Button Grid.Column="1" Text="Homens" Style="{StaticResource Aba}"
+                        Command="{Binding SelecionarCategoriaCommand}" CommandParameter="Homens">
+                    <Button.Triggers>
+                        <DataTrigger TargetType="Button" Binding="{Binding HomensSelecionado}" Value="True">
+                            <Setter Property="BackgroundColor" Value="{StaticResource CorHomens}" />
+                            <Setter Property="TextColor" Value="White" />
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
+                <Button Grid.Column="2" Text="Sobrenomes" Style="{StaticResource Aba}"
+                        Command="{Binding SelecionarCategoriaCommand}" CommandParameter="Sobrenomes">
+                    <Button.Triggers>
+                        <DataTrigger TargetType="Button" Binding="{Binding SobrenomesSelecionado}" Value="True">
+                            <Setter Property="BackgroundColor" Value="{StaticResource CorSobrenomes}" />
+                            <Setter Property="TextColor" Value="White" />
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- Lista do ranking -->
+        <Border Grid.Row="5" Style="{StaticResource Cartao}" Padding="0" IsVisible="{Binding TemResultado}">
+            <CollectionView ItemsSource="{Binding Ranking}" SelectionMode="None">
+                <CollectionView.Header>
+                    <Label Text="{Binding TituloRanking}" FontAttributes="Bold" FontSize="15"
+                           TextColor="{StaticResource Texto}" Padding="14,14,14,6" />
+                </CollectionView.Header>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:RankingItem">
+                        <Grid ColumnDefinitions="36,*" RowDefinitions="Auto,Auto" Padding="14,8" ColumnSpacing="10" RowSpacing="4">
+                            <Border Grid.RowSpan="2" WidthRequest="30" HeightRequest="30" StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 15" BackgroundColor="#EEF1F7" VerticalOptions="Center">
+                                <Label Text="{Binding Posicao}" FontAttributes="Bold" FontSize="13"
+                                       HorizontalOptions="Center" VerticalOptions="Center"
+                                       TextColor="{StaticResource Marca}" />
+                            </Border>
+                            <Grid Grid.Column="1" ColumnDefinitions="*,Auto">
+                                <Label Text="{Binding Nome}" FontSize="16" FontAttributes="Bold"
+                                       TextColor="{StaticResource Texto}" />
+                                <Label Grid.Column="1" Text="{Binding FrequenciaTexto}" FontSize="13"
+                                       TextColor="{StaticResource TextoSuave}" VerticalOptions="Center" />
+                            </Grid>
+                            <ProgressBar Grid.Row="1" Grid.Column="1" Progress="{Binding Proporcao}"
+                                         ProgressColor="{StaticResource Marca}" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Border>
+    </Grid>
+</ContentPage>

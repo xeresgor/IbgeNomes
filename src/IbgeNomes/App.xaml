@@ -1,0 +1,26 @@
+<?xml version = "1.0" encoding = "UTF-8" ?>
+<Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:views="clr-namespace:IbgeNomes.Views"
+             x:Class="IbgeNomes.App">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
+                <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Paleta do app -->
+            <Color x:Key="Marca">#1B4F9C</Color>
+            <Color x:Key="Fundo">#F4F6FA</Color>
+            <Color x:Key="Texto">#1C2333</Color>
+            <Color x:Key="TextoSuave">#5F6B7E</Color>
+            <Color x:Key="CorMulheres">#C2185B</Color>
+            <Color x:Key="CorHomens">#1565C0</Color>
+            <Color x:Key="CorSobrenomes">#2E7D32</Color>
+
+            <views:InverterBoolConverter x:Key="Inverter" />
+            <views:EhNuloConverter x:Key="EhNulo" />
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
